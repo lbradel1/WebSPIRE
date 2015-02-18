@@ -1,0 +1,24 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>/Users/thepunksnowman/Dropbox/Research/ForceSpireMVC/dist/ForceSpireJava.jar</jar>
+  <outfile>/Users/thepunksnowman/Desktop/ForceSPIRE.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>/Users/thepunksnowman/Dropbox/Research/ForceSpireMVC/graphics/Death Star.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0_26</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <initialHeapSize>1024</initialHeapSize>
+    <maxHeapSize>1024</maxHeapSize>
+  </jre>
+</launch4jConfig>
