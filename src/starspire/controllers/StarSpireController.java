@@ -33,6 +33,7 @@ import javax.swing.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
+import starspire.webscraper.BingHandler;
 
 /**
  * The ForceSpireController basically represents a project/document when it's open
@@ -2460,8 +2461,13 @@ public class StarSpireController implements ComponentListener, DataListener {
      * @param query String to search for
      * @return number of search hits (# of documents in which the string was found)
      */
-    public Search search(SearchNode s, String query) {
+    public Search search(SearchNode s, String query)  {
         graphLayout.stop();
+        
+        //Webscraping modifications
+        BingHandler bh = new BingHandler();
+        bh.storeArticles(data, bh.getArticles(query));
+        
         Iterator<Document> docs = data.documentIterator();
         Iterator<Document> hiddenDocs = data.hiddenDocsIterator();
         //ArrayList<Document> results = new ArrayList<Document>();

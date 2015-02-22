@@ -12,6 +12,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.parser.ParseException;
 import starspire.models.DataModel;
 import starspire.models.Document;
@@ -44,14 +46,18 @@ public class BingHandler {
      * @throws ParseException
      * @throws IOException 
      */
-        public List<Article> getArticles(String query) throws ParseException, IOException{
+        public List<Article> getArticles(String query){
             String json = this.getBingJson(query);
             
             SERPParser serpParser = new SERPParser();
             HtmlExtractor htmlExtractor = new HtmlExtractor();
             
-            List<Article> articles;
+            List<Article> articles = null;
+        try {
             articles = serpParser.parseSERP(json);
+        } catch (ParseException ex) {
+            Logger.getLogger(BingHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
             System.out.println("Extracting text from URL HTML");
             
             String content = "";
@@ -59,10 +65,14 @@ public class BingHandler {
             List<Integer> deletionIndices = new ArrayList<Integer>();
             
             for(Article a : articles)   {
-                if ((content = htmlExtractor.getWebsiteText(a.getUrl())) != "" )    
-                    a.setContent(content);
-                else
-                    deletionIndices.add(articles.indexOf(a));
+                try {
+                    if ((content = htmlExtractor.getWebsiteText(a.getUrl())) != "" )    
+                        a.setContent(content);
+                    else
+                        deletionIndices.add(articles.indexOf(a));
+                } catch (IOException ex) {
+                    Logger.getLogger(BingHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             
             for(Integer i : deletionIndices)    {
