@@ -25,11 +25,18 @@ import starspire.models.Document;
  * @author 2EEZY4WEEZY
  */
 public class BingHandler {
-    private DataModel data;
-    
-    public BingHandler(DataModel d)     {
-        this.data = d;
+    /**
+     * Stores a list of articles into the hidden docs of the Datamodel.
+     * @param data 
+     */
+    public void storeArticles(DataModel data,List<Article> articles)   {
+        Document doc = null;
+        for(Article a : articles)   {
+            doc = new Document(a.getContent(), a.getTitle(), a.getUrl());
+            data.addHiddenDocument(doc);
+        }
     }
+    
     /**
      * Returns a list of articles given a search string from Yahoo news.
      * @param query
@@ -37,32 +44,32 @@ public class BingHandler {
      * @throws ParseException
      * @throws IOException 
      */
-        public List<Document> getDocuments(String query) {
+        public List<Article> getArticles(String query) throws ParseException, IOException{
             String json = this.getBingJson(query);
             
             SERPParser serpParser = new SERPParser();
             HtmlExtractor htmlExtractor = new HtmlExtractor();
             
-            List<Document> documents;
-            documents = serpParser.parseSERP(json);
+            List<Article> articles;
+            articles = serpParser.parseSERP(json);
             System.out.println("Extracting text from URL HTML");
             
             String content = "";
             
             List<Integer> deletionIndices = new ArrayList<Integer>();
             
-            for(Document d : documents)   {
-                if (!"".equals(content = htmlExtractor.getWebsiteText(d.getUrl())) )    
-                    d.setContent(content);
+            for(Article a : articles)   {
+                if ((content = htmlExtractor.getWebsiteText(a.getUrl())) != "" )    
+                    a.setContent(content);
                 else
-                    deletionIndices.add(documents.indexOf(d));
+                    deletionIndices.add(articles.indexOf(a));
             }
             
             for(Integer i : deletionIndices)    {
-                documents.remove(i);
+                articles.remove(i);
             }
             
-            return(documents);
+            return(articles);
         }
         
         
@@ -76,7 +83,7 @@ public class BingHandler {
         URL url;
         try {
             url = new URL(
-                    "https://api.datamarket.azure.com/Bing/Search/News?Query=%27" + query + "%27&$top=50&$format=json");
+                    "https://api.datamarket.azure.com/Bing/Search/Web?Query=%27" + query + "%27&$top=50&$format=json");
             
 
             System.out.println("Opening connection to Bing servers...");

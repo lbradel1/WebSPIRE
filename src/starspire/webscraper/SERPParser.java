@@ -11,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import starspire.models.Document;
 
 /**
  * Implementation of SERP JSON parser for StarSPIRE. Creates a list of articles
@@ -27,22 +26,17 @@ public class SERPParser {
      * 
      * @param jsonString string to be parsed
      * @return list of articles with title, summary and URL set.
+     * @throws ParseException 
      */
-    public List<Document> parseSERP(String jsonString)
+    public List<Article> parseSERP(String jsonString) throws ParseException
         {
             System.out.println("Parsing JSON from Bing servers...");
             
-            List<Document> documents = new ArrayList();
+            List<Article> articles = new ArrayList();
             JSONParser parser = new JSONParser();
             
-            Object obj;
-            
-            try {
-            obj = parser.parse(jsonString);
-            } catch (ParseException e)    {
-                System.out.println("Parsing failure");
-                return null;
-            }
+            Object obj = parser.parse(jsonString);
+        
             JSONObject rootNode = (JSONObject) obj;
             JSONObject defaultNode = (JSONObject) rootNode.get("d");
             
@@ -53,15 +47,16 @@ public class SERPParser {
             int i = 0;
             while(iterator.hasNext())   {
                 e = iterator.next();
-                documents.add(new Document());
-                documents.get(i).setName((String) e.get("Title"));
-                documents.get(i).setUrl((String) e.get("Url"));
+                articles.add(new Article());
+                articles.get(i).setTitle((String) e.get("Title"));
+                articles.get(i).setDescription((String) e.get("Description"));
+                articles.get(i).setUrl((String) e.get("Url"));
                 i++;
             }
             
             System.out.println("Server returned " + i + " results");
             
-            return(documents);
+            return(articles);
         }
 }
 

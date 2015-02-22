@@ -18,6 +18,7 @@ public class Document {
     private String name;
     private String content;
     private String notes;
+    private String url;
     private ArrayList<Highlight> highlights;
     private ArrayList<Entity> entities; //should we have this AND Entity has list of Documents?
     private boolean isVisible;
@@ -32,7 +33,7 @@ public class Document {
      */
     public Document() {
         isMSSI = false;
-        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, "", "", null);
+        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, "", "", "", null);
     }
 
     /**
@@ -41,7 +42,7 @@ public class Document {
      */
     public Document(String cont) {
         isMSSI = false;
-        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, cont, "", null);
+        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, cont, "", "", null);
     }
     
         /**
@@ -51,7 +52,7 @@ public class Document {
     public Document(String cont, boolean SI) {
         isMSSI = SI;
         //System.out.println("used correct MSSI constructor");
-        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, cont, "", null);
+        setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, cont, "", "", null);
     }
 
     /**
@@ -62,9 +63,19 @@ public class Document {
      */
     public Document(String content, String name) {
         isMSSI = false;
-        setup(++NEXT_SERIAL_ID, name, content, "", null);
+        setup(++NEXT_SERIAL_ID, name, content,"", "", null);
     }
-
+    /**
+     * Content, name and URL constructor, creates a document with the specified
+     * content and name URL. For WebDocuments.
+     * @param content content of the document
+     * @param name title for doc
+     * @param url URL of doc
+     */
+    public Document(String content, String name, String url) {
+        isMSSI = false;
+        setup(++NEXT_SERIAL_ID, name, content, "", url, null);
+    }
     /**
      * JSON constructor. Used for loading a document from a JSON save.
      * @param doc JSON object containing doc data.
@@ -84,7 +95,7 @@ public class Document {
             h.add(new Highlight(a.getJSONArray(i)));
         }
 
-        setup(lid, n, c, not, h);
+        setup(lid, n, c, not,"", h);
 
         if (lid >= NEXT_SERIAL_ID) {
             NEXT_SERIAL_ID = lid + 1;
@@ -97,10 +108,11 @@ public class Document {
      * @param n name for document
      * @param c content for document
      */
-    private void setup(int nid, String n, String c, String not, ArrayList<Highlight> h) {
+    private void setup(int nid, String n, String c, String not, String u, ArrayList<Highlight> h) {
         id = nid;
         name = n;
         content = c;
+        url = u;
         entities = new ArrayList<Entity>();
         highlights = new ArrayList<Highlight>();
         if (h != null) {
@@ -237,6 +249,22 @@ public class Document {
         notes = s;
     }
 
+    /**
+     * Returns document URL
+     * @return document URL
+     */
+    public String getUrl()  {
+        return url;
+    }
+    
+    /**
+     * Sets the URL of the document
+     * @param new URL of document
+     */
+    protected void setUrl(String u) {
+        url = u;
+    }
+    
     /**
      * Add a string to the highlights for this document
      * @param start

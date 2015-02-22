@@ -25,8 +25,9 @@ public class HtmlExtractor {
      * @return A string of the website's text
      * @throws IOException 
      */
-    public String getWebsiteText(String url)    {
+    public String getWebsiteText(String url) throws IOException   {
         
+        System.out.println(url);
         Document doc = null;
         try {
             doc = Jsoup.connect(url).timeout(10*1000).get();
@@ -44,10 +45,7 @@ public class HtmlExtractor {
                 System.out.println("Non-200 HTTP Response Code: " + e.getStatusCode() + " For server at " + url);
         } catch (UnsupportedMimeTypeException e)    {
             System.out.println("The server at " + url + " sent a pdf/powerpoint/non-html file and was ignored");
-        } catch (IOException e) {
-            System.out.println("System threw IOException when trying to connect to server at: " + url);
         }
-        
         String holder = "";
         
         if (doc != null)    {
