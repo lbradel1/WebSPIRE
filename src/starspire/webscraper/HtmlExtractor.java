@@ -27,7 +27,12 @@ public class HtmlExtractor {
      */
     public String getWebsiteText(String url) throws IOException   {
         
-        System.out.println(url);
+        if (url == null)
+        {
+            System.out.println("URL: " + url + " was empty.");
+            return("INVALID URL");
+        }
+        
         Document doc = null;
         try {
             doc = Jsoup.connect(url).timeout(10*1000).get();
@@ -45,6 +50,11 @@ public class HtmlExtractor {
                 System.out.println("Non-200 HTTP Response Code: " + e.getStatusCode() + " For server at " + url);
         } catch (UnsupportedMimeTypeException e)    {
             System.out.println("The server at " + url + " sent a pdf/powerpoint/non-html file and was ignored");
+        } catch (IllegalArgumentException e)  {
+            System.out.println("IllegalArgumentException!!: ");
+            System.out.println(e.getMessage());
+            System.out.println(e.getCause());
+            System.out.println(url);
         }
         String holder = "";
         

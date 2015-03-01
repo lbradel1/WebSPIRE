@@ -79,6 +79,8 @@ public class BingHandler {
                 articles.remove(i);
             }
             
+            System.out.println(Integer.toString(articles.size()) + " good documents extracted.");
+            
             return(articles);
         }
         
@@ -93,7 +95,7 @@ public class BingHandler {
         URL url;
         try {
             url = new URL(
-                    "https://api.datamarket.azure.com/Bing/Search/Web?Query=%27" + query + "%27&$top=50&$format=json");
+                    "https://api.datamarket.azure.com/Bing/Search/News?Query=%27" + query + "%27&$top=50&$format=json");
             
 
             System.out.println("Opening connection to Bing servers...");
