@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +36,7 @@ public class BingHandler {
         Document doc = null;
         for(Article a : articles)   {
             doc = new Document(a.getContent(), a.getTitle(), a.getUrl());
-            data.addHiddenDocument(doc);
+            data.addDocument(doc);
         }
     }
     
@@ -62,22 +63,22 @@ public class BingHandler {
             
             String content = "";
             
-            List<Integer> deletionIndices = new ArrayList<Integer>();
             
-            for(Article a : articles)   {
+            Iterator<Article> iter = articles.iterator();
+            
+            while(iter.hasNext()) {
+                Article current = iter.next();
                 try {
-                    if ((content = htmlExtractor.getWebsiteText(a.getUrl())) != "" )    
-                        a.setContent(content);
-                    else
-                        deletionIndices.add(articles.indexOf(a));
+                    content = htmlExtractor.getWebsiteText(current.getUrl());
                 } catch (IOException ex) {
                     Logger.getLogger(BingHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                if(content != null && content != "" && !content.isEmpty())
+                    current.setContent(content);
+                else
+                    iter.remove();
             }
             
-            for(Integer i : deletionIndices)    {
-                articles.remove(i);
-            }
             
             System.out.println(Integer.toString(articles.size()) + " good documents extracted.");
             
@@ -89,7 +90,7 @@ public class BingHandler {
     public String getBingJson(String query)    {
         String ret = "";
         query = query.replaceAll("\\s+", "%20");
-        String accountKey = "owiQTgpl8LRi4KfsVvAPuRtdon0QKq1fcTsBv/JD+O8=";
+        String accountKey = "";//PLACE ACCOUNT KEY HERE
         byte[] accountKeyBytes = Base64.encodeBase64((accountKey + ":" + accountKey).getBytes());
         String accountKeyEnc = new String(accountKeyBytes);
         URL url;
@@ -129,6 +130,38 @@ public class BingHandler {
             }
             return ret;
         }
-    }
     
-
+        public boolean testIntegrity(DataModel data, List<Article> articles)   {
+            List<String> missingDocs;
+            List<String> docs = new ArrayList<String>();
+            
+            
+            Iterator it = data.documentIterator();
+            
+            while(it.hasNext()) {
+                Document current = (Document)it.next();
+                try{
+                    docs.add(current.getName());
+                
+                
+                if (current.getContent().isEmpty() || current.getContent() == "")   {
+                    System.out.println("FAILURE in document title " + current.getName());
+                    return(false);
+                }
+                } catch (NullPointerException e)  {
+                    //System.out.println("Exception thrown for document number " it.)
+                }
+            }
+            
+            for(Article a : articles)  {
+                if(!docs.contains(a.getTitle()))    {
+                    System.out.println("Could not find " + a.getTitle());
+                    return(false);
+                }
+            }
+            
+            
+            return(true);
+        }
+                
+    }

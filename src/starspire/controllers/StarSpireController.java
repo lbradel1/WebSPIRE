@@ -1777,7 +1777,7 @@ public class StarSpireController implements ComponentListener, DataListener {
 
 
         
-        /*String entString = "";
+        String entString = "";
         
         for(Entity e : ent) {
         entString = entString.concat(e.getName());
@@ -1788,9 +1788,17 @@ public class StarSpireController implements ComponentListener, DataListener {
         System.out.println(entString);
         
         BingHandler bh = new BingHandler();
-        bh.storeArticles(data, bh.getArticles(entString));
         
-        generateNewHiddenEntities();*/
+        java.util.List<starspire.webscraper.Article> myList = bh.getArticles(entString);
+        bh.storeArticles(data, myList);
+        
+        
+        
+        if(!bh.testIntegrity(data, myList)) {
+            System.exit(-1);
+        }
+        
+        //generateNewEntities();
         
         
     	int docAddLimit = 10;

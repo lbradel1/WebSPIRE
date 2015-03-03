@@ -4,6 +4,8 @@
 package starspire.webscraper;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
@@ -55,6 +57,10 @@ public class HtmlExtractor {
             System.out.println(e.getMessage());
             System.out.println(e.getCause());
             System.out.println(url);
+        } catch (SocketTimeoutException e)  {
+            System.out.println("Server at " + url + " timed out.");
+        } catch (ConnectException e) {
+            System.out.println("Server at " + url + " is terrible. (Connection Refused)");
         }
         String holder = "";
         
