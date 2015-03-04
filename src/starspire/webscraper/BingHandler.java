@@ -13,6 +13,11 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.parser.ParseException;
@@ -51,32 +56,56 @@ public class BingHandler {
             String json = this.getBingJson(query);
             
             SERPParser serpParser = new SERPParser();
-            HtmlExtractor htmlExtractor = new HtmlExtractor();
             
             List<Article> articles = null;
-        try {
-            articles = serpParser.parseSERP(json);
-        } catch (ParseException ex) {
-            Logger.getLogger(BingHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-            System.out.println("Extracting text from URL HTML");
+            try {
+                articles = serpParser.parseSERP(json);
+            } catch (ParseException ex) {
+                System.out.println("ParseException Detected");
+            }
+                System.out.println("Extracting text from URL HTML");
             
             String content = "";
-            
+            List<String> urls = new ArrayList<String>();
             
             Iterator<Article> iter = articles.iterator();
             
-            while(iter.hasNext()) {
+            while(iter.hasNext())   {
                 Article current = iter.next();
-                try {
-                    content = htmlExtractor.getWebsiteText(current.getUrl());
-                } catch (IOException ex) {
-                    Logger.getLogger(BingHandler.class.getName()).log(Level.SEVERE, null, ex);
+                urls.add(current.getUrl());
+            }
+            
+            HtmlExtractor htmlExtractor = new HtmlExtractor(urls);
+            iter = articles.iterator();
+            ExecutorService executorService = Executors.newCachedThreadPool();
+            
+            List<Future> futures = new ArrayList<Future>();
+            
+            while(iter.hasNext())   {
+                Article current = iter.next();
+                futures.add(executorService.submit(htmlExtractor));
+            }
+            
+            iter = articles.iterator();
+            
+            try {
+                
+                for (int i = 0; iter.hasNext(); i++) {
+                    Article current = iter.next();
+                
+                    content = (String)futures.get(i).get();
+                    if(content != null && content != "" && !content.isEmpty())
+                        current.setContent(content);
+                    else    {
+                        iter.remove();
+                    }
                 }
-                if(content != null && content != "" && !content.isEmpty())
-                    current.setContent(content);
-                else
-                    iter.remove();
+            } catch (InterruptedException e)    {
+                System.out.println(e.toString());
+            } catch (ExecutionException e)  {
+                System.out.println(e.toString());
+            } catch (CancellationException e )  {
+                System.out.println(e.toString());
             }
             
             

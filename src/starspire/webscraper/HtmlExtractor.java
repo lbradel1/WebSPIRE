@@ -6,6 +6,10 @@ package starspire.webscraper;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
@@ -18,7 +22,24 @@ import org.jsoup.select.Elements;
  * 
  * @author Nathan Wycoff
  */
-public class HtmlExtractor {
+public class HtmlExtractor implements Callable {
+    private List<String> urls;
+    private int i;
+    
+    protected HtmlExtractor(List<String> u) {
+        this.urls = u;
+        this.i = -1;
+    }
+        
+    public String call()  {
+        i++;
+        try {
+            return(getWebsiteText(this.urls.get(this.i)));
+        } catch (IOException ex) {
+            System.out.println("IOException when reaching url at " + urls.get(this.i));
+            return(null);
+        } 
+    }
     /**
      * Opens connection to website, downloads HTML, parses HTML and returns 
      * text paragraphs.
@@ -27,7 +48,7 @@ public class HtmlExtractor {
      * @return A string of the website's text
      * @throws IOException 
      */
-    public String getWebsiteText(String url) throws IOException   {
+    private String getWebsiteText(String url) throws IOException   {
         
         if (url == null)
         {
