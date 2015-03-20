@@ -2334,63 +2334,7 @@ public class StarSpireController implements ComponentListener, DataListener {
         }
     }
     
-    /**
-     * This generates entities using CPA's entity extractor when a new set
-     * text documents are imported in to ForceSPIRE and sent to hiddenDocs.
-     */
-    private void generateNewHiddenEntities() {
-        if (this != null) {
-            graphLayout.stop();
-
-            long start = System.currentTimeMillis();
-            System.out.print("Thread " + Thread.currentThread().getName()
-                    + "Generating entities");
-            Iterator<Document> docs = data.hiddenDocsIterator();
-            int doccount = 0;
-            int entcount = 0;
-            //TODO initial size should be some kind of config variable
-            //HashSet<String> uniqueKeys = new HashSet<String>(60000);
-            Parser parser = new Parser();
-            String toParse = "";
-            while (docs.hasNext()) {
-                Document doc = docs.next();
-                //System.out.println("("+doccount+")");
-                doccount++;
-                //Parse each document for entities
-                toParse += doc.getContent() + "\n\n";
-            }
-
-            ArrayList<String> stringList = EntityExtractorWrapper.extractEntities(toParse);
-            System.out.println("Number of entities found: " + stringList.size());
-
-            for (String s : stringList) {
-                if (!data.hasEntity(s) && !parser.isStopWord(s)) {
-                    //uniqueKeys.add(s);
-                    //these are all entities, add them
-                    addEntity(s, false);
-                    //Entity e = data.getEntity(s);
-                    //adds Entity to list in Doc, Doc to list in Entity
-                    //TODO: if already in list, does nothing right now. Should add weight?
-                    //data.link(e, doc);
-                    //System.out.println("Found " + entcount + " " + e.getName());
-                    entcount++;
-//                        if (entcount % 1000 == 0) {
-//                            System.out.print(".");
-//                        }
-                } else {
-                    //System.out.println(s+" is already an entity, or stopword!");
-                }
-                System.out.print(".");
-            }
-
-            long end = System.currentTimeMillis();
-            System.out.println("Thread " + Thread.currentThread().getName()
-                    + " Entities extracted in " + (end - start) + " miliseconds");
-            System.out.println("Found " + entcount + " unique, new entities");
-            System.out.println("       from " + doccount + " documents.");
-            graphLayout.start();
-        }
-    }
+    
 
     private void generateTFIDFWeights() {
         Iterator<Entity> ents = data.entityIterator();
@@ -2547,9 +2491,6 @@ public class StarSpireController implements ComponentListener, DataListener {
     public Search search(SearchNode s, String query)  {
         graphLayout.stop();
         
-        //Webscraping modifications
-        //BingHandler bh = new BingHandler();
-        //bh.storeArticles(data, bh.getArticles(query));
         
         Iterator<Document> docs = data.documentIterator();
         Iterator<Document> hiddenDocs = data.hiddenDocsIterator();
