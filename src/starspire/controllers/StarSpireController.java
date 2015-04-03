@@ -2286,8 +2286,6 @@ public class StarSpireController implements ComponentListener, DataListener {
             graphLayout.stop();
 
             TimeKeeper tk = new TimeKeeper();
-            
-            tk.startStopwatch();
             long start = System.currentTimeMillis();
             System.out.print("Thread " + Thread.currentThread().getName()
                     + "Generating entities");
@@ -2305,12 +2303,14 @@ public class StarSpireController implements ComponentListener, DataListener {
                 //Parse each document for entities
                 toParse += doc.getContent() + "\n\n";
             }
-            tk.printStopwatch();
 
             tk.startStopwatch();
             ArrayList<String> stringList = EntityExtractorWrapper.extractEntities(toParse);
             System.out.println("Number of entities found: " + stringList.size());
-
+            
+            tk.printStopwatch();
+            tk.startStopwatch();
+            
             for (String s : stringList) {
                 if (!data.hasEntity(s) && !parser.isStopWord(s)) {
                     //uniqueKeys.add(s);
@@ -2337,7 +2337,7 @@ public class StarSpireController implements ComponentListener, DataListener {
             System.out.println("Found " + entcount + " unique, new entities");
             System.out.println("       from " + doccount + " documents.");
             graphLayout.start();
-            tk.printAverages();
+            tk.printStopwatch();
         }
     }
     

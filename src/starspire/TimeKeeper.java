@@ -46,6 +46,7 @@ public class TimeKeeper {
     }
     
     public void printStopwatch()    {
+        System.out.println();
         System.out.println("Run " + runs + " time: " + this.endStopwatch());
     }
     
@@ -87,6 +88,7 @@ public class TimeKeeper {
     }
     
     public void printAverages() {
+        System.out.println();
         for(int i = 0; i < averageStore.length; i++)    {
             System.out.println(this.getAverage(i));            
         }
