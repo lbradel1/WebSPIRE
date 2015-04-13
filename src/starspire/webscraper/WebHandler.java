@@ -6,10 +6,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +23,9 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.parser.ParseException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import starspire.models.DataModel;
 import starspire.models.Document;
 
@@ -32,17 +37,54 @@ import starspire.models.Document;
  *
  * @author 2EEZY4WEEZY
  */
-public class BingHandler {
+public class WebHandler {
     /**
      * Stores a list of articles into the hidden docs of the Datamodel.
      * @param data 
      */
-    public void storeArticles(DataModel data,List<Article> articles)   {
+    public void retrieveBingArticles(DataModel data,String query)   {
+        
+        List<Article> articles = this.getBingArticles(query);
+        
         Document doc = null;
         for(Article a : articles)   {
             doc = new Document(a.getContent(), a.getTitle(), a.getUrl());
             data.addDocument(doc);
         }
+    }
+    private String currentURL = "";
+
+    /**
+     * Stores a list of articles into the hidden docs of the Datamodel.
+     *
+     * @param data
+     */
+    public void retrieveIEEEArticles(DataModel data, String query) {
+
+        List<Article> articles = this.getIEEEArticles(query);
+        
+        starspire.models.Document doc = null;
+        for (Article a : articles) {
+            doc = new starspire.models.Document(a.getContent(), a.getTitle());
+            data.addDocument(doc);
+        }
+    }
+
+    /**
+     * Use this main to test IEEE services.
+     *
+     * @param args the command line arguments
+     */
+    private List<Article> getIEEEArticles(String query) {
+
+        System.out.println("Opening Connection to IEEE servers...");
+        ArrayList<String> urls = this.getIEEELinksHtml(this.getIEEEPageHtml(query));
+
+        System.out.println("Retrieving IEEE Abstract HTML...");;
+        List<Article> ret = this.getIEEEContent(urls);
+
+        return(ret);
+
     }
     
     /**
@@ -52,7 +94,7 @@ public class BingHandler {
      * @throws ParseException
      * @throws IOException 
      */
-        public List<Article> getArticles(String query){
+        private List<Article> getBingArticles(String query){
             String json = this.getBingJson(query);
             
             SERPParser serpParser = new SERPParser();
@@ -75,7 +117,7 @@ public class BingHandler {
                 urls.add(current.getUrl());
             }
             
-            HtmlExtractor htmlExtractor = new HtmlExtractor(urls);
+            BingHtmlExtractor htmlExtractor = new BingHtmlExtractor(urls);
             iter = articles.iterator();
             ExecutorService executorService = Executors.newCachedThreadPool();
             
@@ -119,7 +161,7 @@ public class BingHandler {
     public String getBingJson(String query)    {
         String ret = "";
         query = query.replaceAll("\\s+", "%20");
-        String accountKey = "";//PLACE ACCOUNT KEY HERE
+        String accountKey = "owiQTgpl8LRi4KfsVvAPuRtdon0QKq1fcTsBv/JD+O8=";//PLACE ACCOUNT KEY HERE
         byte[] accountKeyBytes = Base64.encodeBase64((accountKey + ":" + accountKey).getBytes());
         String accountKeyEnc = new String(accountKeyBytes);
         URL url;
@@ -192,5 +234,105 @@ public class BingHandler {
             
             return(true);
         }
+        
+     /**
+     * This method returns a string containing the SERP HTML
+     *
+     * @param urlToRead url of SERP
+     * @return A String representation of the URL's HTML
+     */
+    private String getIEEEPageHtml(String urlToRead) {
+        try {
+            urlToRead = URLEncoder.encode(urlToRead, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            System.out.println("URL Encoding Failure");
+            ex.printStackTrace();
+        }
+        currentURL = "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=" + urlToRead;
+        
+        
+        
+        URL url;
+        HttpURLConnection conn;
+        BufferedReader rd;
+        String line;
+        String result = "";
+        try {
+            url = new URL(currentURL);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            while ((line = rd.readLine()) != null) {
+                result += line;
+            }
+            rd.close();
+        } catch (IOException e) {
+        }
+        return (result);
+    }
+
+    /**
+     * Parses html from a SERP page to get the links embedded therein.
+     *
+     * @param html html to parse
+     * @return An arraylist of Strings, each string being a URL.
+     */
+    private ArrayList<String> getIEEELinksHtml(String html) {
+
+        org.jsoup.nodes.Document doc = Jsoup.parse(html, currentURL);
+        Elements hTags = doc.select("h3");
+
+        ArrayList<Elements> aTags = new ArrayList<Elements>();
+
+
+
+        for (Element e : hTags) {
+            aTags.add(e.getElementsByTag("a"));
+        }
+
+
+        ArrayList<String> ret = new ArrayList<String>();
+
+        for (Elements e : aTags) {
+            for (Element e1 : e) {
+                ret.add(e1.attr("abs:href"));
+            }
+        }
+
+        Iterator it = ret.iterator();
+
+        while (it.hasNext()) {
+            String myString = (String) it.next();
+            if (!myString.contains("articleDetails")) {
+                it.remove();
+            }
+        }
+        return (ret);
+    }
+
+    private ArrayList<Article> getIEEEContent(ArrayList<String> urls) {
+        IEEEHtmlExtractor extractor = new IEEEHtmlExtractor(urls);
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+        ArrayList<Future> futures = new ArrayList<Future>();
+
+        for (String url : urls) {
+            futures.add(executorService.submit(extractor));
+        }
+        
+        ArrayList<Article> ret = new ArrayList<Article>();
+        
+        for (Future f : futures) {
+            try {
+                ret.add((Article) f.get());
+            } catch (InterruptedException ex) {
+                System.out.println("Error in Futures");
+            } catch (ExecutionException ex) {
+                System.out.println("Error in Futures");
+            }
+        }
+        return (ret);
+    }
                 
     }

@@ -33,9 +33,8 @@ import javax.swing.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
-import starspire.webscraper.BingHandler;
+import starspire.webscraper.WebHandler;
 import starspire.TimeKeeper;
-import starspire.webscraper.FormSubmitter1;
 
 /**
  * The ForceSpireController basically represents a project/document when it's open
@@ -1789,13 +1788,10 @@ public class StarSpireController implements ComponentListener, DataListener {
         System.out.println("My Entities: ");
         System.out.println(entString);
         
-        /*BingHandler bh = new BingHandler();
-         * 
-         * java.util.List<starspire.webscraper.Article> myList = bh.getArticles(entString);
-         * bh.storeArticles(data, myList);*/
-        
-        FormSubmitter1 fs = new FormSubmitter1();
-        fs.storeArticles(data, entString);
+        WebHandler bh = new WebHandler();
+         
+        bh.retrieveBingArticles(data, entString);
+        bh.retrieveIEEEArticles(data, entString);
         
         /*if(!bh.testIntegrity(data, myList)) {
          * System.exit(-1);
