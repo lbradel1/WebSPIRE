@@ -34,7 +34,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
 import starspire.webscraper.BingHandler;
-import starspire.TimeKeeper;
 
 /**
  * The ForceSpireController basically represents a project/document when it's open
@@ -909,13 +908,17 @@ public class StarSpireController implements ComponentListener, DataListener {
         graphLayout.start();
     }
 
+    
+    
     /**
      * Add an entity to the document model
      * @param s entity to add
      * @param softdata true if adding entity from user data false otherwise.
      */
     public void addEntity(String s, boolean softdata) {
+        
         data.addEntity(s, softdata);
+        
     }
 
     /**
@@ -1793,7 +1796,7 @@ public class StarSpireController implements ComponentListener, DataListener {
         java.util.List<starspire.webscraper.Article> myList = bh.getArticles(entString);
         bh.storeArticles(data, myList);
         
-        
+        this.generateNewEntities();
         
         if(!bh.testIntegrity(data, myList)) {
             System.exit(-1);
@@ -2285,7 +2288,6 @@ public class StarSpireController implements ComponentListener, DataListener {
         if (this != null) {
             graphLayout.stop();
 
-            TimeKeeper tk = new TimeKeeper();
             long start = System.currentTimeMillis();
             System.out.print("Thread " + Thread.currentThread().getName()
                     + "Generating entities");
@@ -2304,12 +2306,9 @@ public class StarSpireController implements ComponentListener, DataListener {
                 toParse += doc.getContent() + "\n\n";
             }
 
-            tk.startStopwatch();
             ArrayList<String> stringList = EntityExtractorWrapper.extractEntities(toParse);
             System.out.println("Number of entities found: " + stringList.size());
             
-            tk.printStopwatch();
-            tk.startStopwatch();
             
             for (String s : stringList) {
                 if (!data.hasEntity(s) && !parser.isStopWord(s)) {
@@ -2337,7 +2336,6 @@ public class StarSpireController implements ComponentListener, DataListener {
             System.out.println("Found " + entcount + " unique, new entities");
             System.out.println("       from " + doccount + " documents.");
             graphLayout.start();
-            tk.printStopwatch();
         }
     }
     
@@ -2595,7 +2593,7 @@ public class StarSpireController implements ComponentListener, DataListener {
                 /*
                  * entity does not exist in the dataset yet
                  */
-            	data.addEntity(query, true);
+        	data.addEntity(query, false);
                 //addEntity(query, true);
                 Entity e = data.getEntity(query);
                 r = data.addSearch(query, e, hits);

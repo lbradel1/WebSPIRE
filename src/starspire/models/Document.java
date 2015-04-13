@@ -17,6 +17,7 @@ public class Document {
     private int id;
     private String name;
     private String content;
+    private ArrayList<String> parsedContent;
     private String notes;
     private String url;
     private ArrayList<Highlight> highlights;
@@ -34,6 +35,7 @@ public class Document {
     public Document() {
         isMSSI = false;
         setup(++NEXT_SERIAL_ID, "ID" + NEXT_SERIAL_ID, "", "", "", null);
+        parsedContent = new ArrayList<String>();
     }
 
     /**
@@ -233,6 +235,13 @@ public class Document {
         content = s;
     }
 
+    public ArrayList<String> getParsedContent() {
+        return parsedContent;
+    }
+
+    public void setParsedContent(ArrayList<String> parsedContent) {
+        this.parsedContent = parsedContent;
+    }
     /**
      * Returns the notes for this node.
      * @return notes string

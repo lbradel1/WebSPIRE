@@ -119,7 +119,7 @@ public class BingHandler {
     public String getBingJson(String query)    {
         String ret = "";
         query = query.replaceAll("\\s+", "%20");
-        String accountKey = "";//PLACE ACCOUNT KEY HERE
+        String accountKey = "owiQTgpl8LRi4KfsVvAPuRtdon0QKq1fcTsBv/JD+O8=";//PLACE ACCOUNT KEY HERE
         byte[] accountKeyBytes = Base64.encodeBase64((accountKey + ":" + accountKey).getBytes());
         String accountKeyEnc = new String(accountKeyBytes);
         URL url;

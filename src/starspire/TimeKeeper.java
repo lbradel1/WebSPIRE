@@ -11,24 +11,19 @@ import java.util.List;
  */
 public class TimeKeeper {
     
-    private long init;
+    private List<Long> init;
     private long count;
-    private List<Long> averageStore[];
+    private ArrayList<ArrayList<Long>> averageStore;
     private int runs;
     
     public TimeKeeper() {
-        init = System.currentTimeMillis();
+        averageStore = new ArrayList<ArrayList<Long>>();
         runs = 0;
+        init = new ArrayList<Long>();
+        
+        
     }
-    /**
-     * Prepares object to receive averaging commands.
-     * Call once immediately before beginning average calculation.
-     * It is not necessary to call this function if the constructor has just been 
-     * called.
-     */
-    public void reinitialize()    {
-        init = System.currentTimeMillis();
-    }
+    
     
     /**
      * Starts time calculation
@@ -48,16 +43,17 @@ public class TimeKeeper {
     public void printStopwatch()    {
         System.out.println();
         System.out.println("Run " + runs + " time: " + this.endStopwatch());
+        runs++;
     }
     
     /**
      * Prepare to record average times.
-     * @param number Number of averages which will be calculated
+     * @param index which average to initialize
      */
-    public void setAverages(int number) {
-        for(int i = 0; i < number; i++) {
-            averageStore[i] = new ArrayList<Long>();
-        }
+    public void setAverages(int index) {
+           averageStore.add(index, new ArrayList<Long>());
+           init.add(System.currentTimeMillis());
+        
     }
     /**
      * This function is called when an iteration of what to be averaged has 
@@ -69,9 +65,11 @@ public class TimeKeeper {
      * @param index which average to stamp
      */
     public void storeAverage(int index) {
+        
         long temp = System.currentTimeMillis();
-        averageStore[index].add(temp - init);
-        init = temp;
+        averageStore.get(index).add(temp - init.get(index));
+        init.set(index, temp);
+        
     }
     /**
      * Calculates an average which has been previously initialized.
@@ -81,16 +79,22 @@ public class TimeKeeper {
      */
     public long getAverage(int index)   {
         long sum = 0;
-        for(Long l : averageStore[index])   {
+        for(Long l : averageStore.get(index))   {
             sum+=l;
         }
-        return(sum/averageStore[index].size());
+        return(sum/averageStore.get(index).size());
     }
     
+    /**
+     *Prints value of all averages to the out stream
+     */
     public void printAverages() {
         System.out.println();
-        for(int i = 0; i < averageStore.length; i++)    {
-            System.out.println(this.getAverage(i));            
+        for(int i = 0; i < averageStore.size(); i++)    {
+            System.out.println("This is an average: " + this.getAverage(i));            
         }
+    }
+    public void reinitializeAverage(int index)  {
+        init.set(index, System.currentTimeMillis());
     }
 }

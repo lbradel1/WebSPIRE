@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.*;
+import starspire.TimeKeeper;
 
 /**
  * The data model represents all the loaded data, all the documents and the
@@ -270,6 +271,7 @@ public class DataModel {
         if(hiddenDocs.contains(doc)) {
             hiddenDocs.remove(doc);
         }
+        this.parseDocument(doc);
         docs.add(doc);
                 
  //       Iterator<Entity> entIt = doc.iterator();
@@ -507,6 +509,11 @@ public class DataModel {
         return entities.containsKey(name.toLowerCase());
     }
 
+    public void parseDocument(Document doc) {
+        Parser parser = new Parser();
+        ArrayList<String> docStringParsed = parser.parseString(doc.getContent());
+        doc.setParsedContent(docStringParsed);
+    }
     /**
      * Adds a new entity from a string.
      * Will be called from the views (highlighting or adding entity)
@@ -514,22 +521,34 @@ public class DataModel {
      * @param softdata true if it's a user created entity.
      * @return Entity the created entity
      */
-    public Entity addEntity(String name, boolean softdata) {
+    public Entity addEntity(String name, boolean softdata) {        
+        
+        long init = System.currentTimeMillis();
+        
         Entity e = new Entity(name, softdata);
         entities.put(name.toLowerCase(), e);
         fireEntityChange(e, EventType.ADDED, DataListener.OTHER);
         Parser parser = new Parser();
-
+        
+        System.out.println("Block 0 " + String.valueOf(System.currentTimeMillis()-init));
+        
+        init = System.currentTimeMillis();
+        
         //find the entity in the documents
         for (Document doc : docs) {
-            ArrayList<String> docStrings = parser.parseString(doc.getContent());
-
+        ArrayList<String> docStrings = doc.getParsedContent();
+        System.out.println("Block 1 " + String.valueOf(System.currentTimeMillis()-init));
+        System.out.println("Parsed Document Content " + docStrings.get(0));
+        
+        init = System.currentTimeMillis();
             //check if the entity is in the document as a separate word (TRUCK)
             if (docStrings.contains(name)) {
                 this.link(e, doc);
             } else if (name.length() > 2 && doc.getContent().toUpperCase().indexOf(name.toUpperCase()) != -1) {
                 this.link(e, doc);
             }
+        System.out.println("Block 2 " + String.valueOf(System.currentTimeMillis()-init));
+        init = System.currentTimeMillis();
         }
         //TODO should calculate the default weight of the entity somewhere
 
