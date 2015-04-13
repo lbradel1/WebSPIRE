@@ -33,7 +33,8 @@ import javax.swing.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
-import starspire.webscraper.BingHandler;
+import starspire.webscraper.WebHandler;
+import starspire.TimeKeeper;
 
 /**
  * The ForceSpireController basically represents a project/document when it's open
@@ -1791,18 +1792,12 @@ public class StarSpireController implements ComponentListener, DataListener {
         System.out.println("My Entities: ");
         System.out.println(entString);
         
-        BingHandler bh = new BingHandler();
-        
-        java.util.List<starspire.webscraper.Article> myList = bh.getArticles(entString);
-        bh.storeArticles(data, myList);
+        WebHandler bh = new WebHandler();
+         
+        bh.retrieveBingArticles(data, entString);
+        bh.retrieveIEEEArticles(data, entString);
         
         this.generateNewEntities();
-        
-        if(!bh.testIntegrity(data, myList)) {
-            System.exit(-1);
-        }
-        
-        //generateNewEntities();
         
         
     	int docAddLimit = 10;
@@ -2339,6 +2334,65 @@ public class StarSpireController implements ComponentListener, DataListener {
         }
     }
     
+    
+    /**
+     * Attempt to generate entities from hidden documents
+     */
+    private void generateNewHiddenEntities() {
+        if (this != null) {
+            graphLayout.stop();
+
+            long start = System.currentTimeMillis();
+            System.out.print("Thread " + Thread.currentThread().getName()
+                    + "Generating hidden entities");
+            Iterator<Document> docs = data.hiddenDocsIterator();
+            
+            int doccount = 0;
+            int entcount = 0;
+            //TODO initial size should be some kind of config variable
+            //HashSet<String> uniqueKeys = new HashSet<String>(60000);
+            Parser parser = new Parser();
+            String toParse = "";
+            while (docs.hasNext()) {
+                Document doc = docs.next();
+                //System.out.println("("+doccount+")");
+                doccount++;
+                //Parse each document for entities
+                toParse += doc.getContent() + "\n\n";
+            }
+
+            ArrayList<String> stringList = EntityExtractorWrapper.extractEntities(toParse);
+            System.out.println("Number of entities found: " + stringList.size());
+            
+            
+            for (String s : stringList) {
+                if (!data.hasEntity(s) && !parser.isStopWord(s)) {
+                    //uniqueKeys.add(s);
+                    //these are all entities, add them
+                    addEntity(s, false);
+                    //Entity e = data.getEntity(s);
+                    //adds Entity to list in Doc, Doc to list in Entity
+                    //TODO: if already in list, does nothing right now. Should add weight?
+                    //data.link(e, doc);
+                    //System.out.println("Found " + entcount + " " + e.getName());
+                    entcount++;
+//                        if (entcount % 1000 == 0) {
+//                            System.out.print(".");
+//                        }
+                } else {
+                    //System.out.println(s+" is already an entity, or stopword!");
+                }
+                System.out.print(".");
+            }
+
+            long end = System.currentTimeMillis();
+            System.out.println("Thread " + Thread.currentThread().getName()
+                    + " Entities extracted in " + (end - start) + " miliseconds");
+            System.out.println("Found " + entcount + " unique, new entities");
+            System.out.println("       from " + doccount + " documents.");
+            graphLayout.start();
+        }
+    }
     
 
     private void generateTFIDFWeights() {

@@ -22,11 +22,11 @@ import org.jsoup.select.Elements;
  * 
  * @author Nathan Wycoff
  */
-public class HtmlExtractor implements Callable {
+public class BingHtmlExtractor implements Callable {
     private List<String> urls;
     private int i;
     
-    protected HtmlExtractor(List<String> u) {
+    protected BingHtmlExtractor(List<String> u) {
         this.urls = u;
         this.i = -1;
     }
