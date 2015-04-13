@@ -48,6 +48,7 @@ public class TimeKeeper {
     public void printStopwatch()    {
         System.out.println();
         System.out.println("Run " + runs + " time: " + this.endStopwatch());
+        runs++;
     }
     
     /**
