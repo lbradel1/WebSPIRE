@@ -90,6 +90,7 @@ public class IEEEHtmlExtractor implements Callable {
         
         
         if (doc == null)    {
+            System.out.println("Anormal return from IEEE callable");
             return(null);
         }
         
@@ -104,9 +105,9 @@ public class IEEEHtmlExtractor implements Callable {
         ret.setContent(content);
         ret.setTitle(title);
         
-        System.out.println("Anormal return from IEEE callable");
         
-        return(null);
+        
+        return(ret);
         
     }
 }

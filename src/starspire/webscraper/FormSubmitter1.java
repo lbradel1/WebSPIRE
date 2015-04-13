@@ -8,8 +8,10 @@ package starspire.webscraper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,7 +46,7 @@ public class FormSubmitter1 {
         
         starspire.models.Document doc = null;
         for (Article a : articles) {
-            doc = new starspire.models.Document(a.getContent(), a.getTitle(), a.getUrl());
+            doc = new starspire.models.Document(a.getContent(), a.getTitle());
             data.addDocument(doc);
         }
     }
@@ -54,11 +56,11 @@ public class FormSubmitter1 {
      *
      * @param args the command line arguments
      */
-    private List<Article> getIEEEArticles(String urlToRead) {
+    private List<Article> getIEEEArticles(String query) {
 
-
+        
         FormSubmitter1 fs = new FormSubmitter1();
-        ArrayList<String> urls = fs.getIEEELinksHtml(fs.getIEEEPageHtml(urlToRead));
+        ArrayList<String> urls = fs.getIEEELinksHtml(fs.getIEEEPageHtml(query));
 
         List<Article> ret = fs.getIEEEContent(urls);
 
@@ -73,14 +75,23 @@ public class FormSubmitter1 {
      * @return A String representation of the URL's HTML
      */
     private String getIEEEPageHtml(String urlToRead) {
-        currentURL = urlToRead;
+        try {
+            urlToRead = URLEncoder.encode(urlToRead, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            System.out.println("URL Encoding Failure");
+            ex.printStackTrace();
+        }
+        currentURL = "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=" + urlToRead;
+        
+        
+        
         URL url;
         HttpURLConnection conn;
         BufferedReader rd;
         String line;
         String result = "";
         try {
-            url = new URL(urlToRead);
+            url = new URL(currentURL);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
