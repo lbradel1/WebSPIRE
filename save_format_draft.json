@@ -1,0 +1,116 @@
+/**
+ * JSON save format draft
+ *
+ * Comments (//) are here just for readability and don't appear in actual files.
+ *
+ * Properties marked as //OPTIONAL can be ommited without crashing the layout.
+ * This allows for some backwards compatibility.
+ *
+ * All properties from v0.12 are now REQUIRED.
+ *
+ * @version 0.12
+ * @author pfiaux@vt.edu
+ */
+{
+    "ForceSpireWorkspace" :
+	{
+        "Width" : "int",
+        "Height" : "int",
+        "GraphModel" :
+            {
+            "Nodes" :
+                [
+                //Node
+                {
+                    "ID" : "int",
+                    "X" : "int",
+                    "Y" : "int",
+                    "class": "string",
+                    "sourceID": "int", //only if type is searchNode
+                    "docID": "int", //Only if type is DocumentNode
+                    "pinned": false,
+                    "open" : false,
+                    "weight" : "double",
+                    "H": "int",
+                    "W": "int",
+                    "divider": "double"
+                },
+                //... (rest of the nodes)
+            ],
+            "Edges" :
+                [
+                //Edge
+                {
+                    "ID" : "int",
+                    "node1" : "int",
+                    "node2" : "int",
+                    "strength" : "double",
+                    "entIds" : [
+                        "int",
+                        //... list of all the entity Ids
+                    ]
+                },
+                //... (rest of the edges)
+            ]
+        },
+        "DataModel" :
+            {
+            // All this is not yet implemented
+            "Documents" :
+                [
+                //Document
+                {
+                    "ID" : "int",
+                    "name" : "string",
+                    "content" : "string",
+                    "notes" : "string",
+                    "highlights" :
+                        [
+                        [ "int","int" ],
+                        //...
+                    ]
+                },
+                //... (rest of the Documents)
+            ],
+            "Entities" :
+                [
+                //Entity
+                {
+                    "ID" : "int",
+                    "name" : "string",
+                    "softdata" : false, //OPTIONAL
+                    "documents" :
+                        [
+                        "int", //document ids
+                        //... res of doc ids
+                    ],
+                    "searches" :
+                        [
+                        "int", //search ids
+                        //... res of search ids
+                    ]
+                },
+                //... (rest of the Entities)
+            ],
+            "Searches" :
+                [
+                //Search
+                {
+                    "ID" : "int",
+                    "query" : "string"
+                }
+
+            ]
+            //... other data
+        },
+        "Layout" :
+            {
+            //Not everything here is optional and depends on each
+            //layout
+            "algorithm" : "ClassNameHere", //this is recomended tho.
+            "width" : "int",
+            "height" : "int",
+            "PauseState" : false
+        }
+    }
+}
