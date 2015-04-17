@@ -4,7 +4,6 @@ import starspire.views.DocumentViewer;
 import starspire.views.EntityViewer;
 import starspire.views.NodeView;
 import starspire.views.GraphView;
-import starspire.webscraper.BingHandler;
 import starspire.models.Entity;
 import starspire.models.Edge;
 import starspire.models.GraphListener;
@@ -39,6 +38,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
+import starspire.webscraper.WebHandler;
 
 /**
  * The ForceSpireController basically represents a project/document when it's open
@@ -111,6 +111,7 @@ public class StarSpireController implements ComponentListener, DataListener {
     private boolean autoSave = false;    //when true, program will automatically save
     private boolean mssiOn = true;
     private boolean bingOn = true;
+    private boolean IEEEOn = true;
 
     /**
      * This private class is used to do the highlight background work...
@@ -1793,20 +1794,24 @@ public class StarSpireController implements ComponentListener, DataListener {
             //see if any documents fall below a threshold and get rid of them
             canPrune = pruneDocuments();
         }
-
-        if(bingOn) {
-	        BingHandler bh = new BingHandler();
-	        
-	        String entString = "";
-	        
-	        for(Entity e : ent) {
-	            entString = entString.concat(e.getName() + " ");
-	        }
-	        
-	        java.util.List<starspire.webscraper.Article> myList = bh.getArticles(entString, data);
-	        bh.storeArticles(data, myList);
-        }
         
+        if (bingOn || IEEEOn) {
+            WebHandler wh = new WebHandler();
+
+            String entString = "";
+
+            for (Entity e : ent) {
+                entString = entString.concat(e.getName() + " ");
+            }
+
+            if (bingOn) {
+
+                wh.retrieveBingArticles(data, entString);
+            }
+            if (IEEEOn) {
+                wh.retrieveIEEEArticles(data, entString);
+            }
+        }
         this.generateNewEntities();
         
     	int docAddLimit = 10;
@@ -2722,6 +2727,9 @@ public class StarSpireController implements ComponentListener, DataListener {
     
     public void setBing(boolean bing) {
     	bingOn = bing;
+    }
+    public void setIEEE(boolean ieee)   {//Implement that ish!
+        IEEEOn = ieee;
     }
     
     public void setSource(int source) {
